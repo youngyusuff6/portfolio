@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://youngyusuff6.netlify.app/sitemap.xml
