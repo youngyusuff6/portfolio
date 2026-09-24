@@ -1,6 +1,6 @@
 const SENDLIB_URL = 'https://sendlib.samueltuoyo.com/api/send';
 const CONTACT_EMAIL = process.env.CONTACT_TO || 'youngyusuff006@gmail.com';
-const FROM_EMAIL = process.env.CONTACT_FROM || 'youngyusuff6@gmail.com';
+const FROM_EMAIL = 'youngyusuff6@gmail.com';
 
 function clean(value, maxLength) {
   return String(value || '').trim().slice(0, maxLength);
@@ -57,7 +57,7 @@ module.exports = async function contactHandler(request, response) {
 
     const sendlibResult = await sendlibResponse.json().catch(() => null);
 
-    if (!sendlibResponse.ok || sendlibResult?.success === false) {
+    if (!sendlibResponse.ok || sendlibResult?.success !== true) {
       console.error('Sendlib request failed', sendlibResponse.status, sendlibResult?.message || 'Unknown error');
       return response.status(502).json({ error: 'Your message could not be sent. Please email me directly.' });
     }
