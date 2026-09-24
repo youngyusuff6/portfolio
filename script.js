@@ -1,63 +1,69 @@
-const body = document.body
+const root = document.documentElement;
+const themeButton = document.querySelector('.theme-toggle');
+const siteHeader = document.querySelector('.site-header');
+const navToggle = document.querySelector('.nav-toggle');
+const savedTheme = localStorage.getItem('portfolio-theme');
+const systemTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-const btnTheme = document.querySelector('.fa-moon')
-const btnHamburger = document.querySelector('.fa-bars')
-
-const addThemeClass = (bodyClass, btnClass) => {
-  body.classList.add(bodyClass)
-  btnTheme.classList.add(btnClass)
+function setTheme(theme) {
+  const dark = theme === 'dark';
+  root.dataset.theme = dark ? 'dark' : 'light';
+  themeButton.setAttribute('aria-pressed', String(dark));
+  themeButton.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
 }
 
-const getBodyTheme = localStorage.getItem('portfolio-theme')
-const getBtnTheme = localStorage.getItem('portfolio-btn-theme')
+setTheme(savedTheme || systemTheme);
 
-addThemeClass(getBodyTheme, getBtnTheme)
+themeButton.addEventListener('click', () => {
+  const theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  setTheme(theme);
+  localStorage.setItem('portfolio-theme', theme);
+});
 
-const isDark = () => body.classList.contains('dark')
+document.querySelector('#year').textContent = new Date().getFullYear();
 
-const setTheme = (bodyClass, btnClass) => {
+navToggle.addEventListener('click', () => {
+  const isOpen = siteHeader.classList.toggle('menu-open');
+  navToggle.setAttribute('aria-expanded', String(isOpen));
+  navToggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+});
 
-	body.classList.remove(localStorage.getItem('portfolio-theme'))
-	btnTheme.classList.remove(localStorage.getItem('portfolio-btn-theme'))
+document.querySelectorAll('#site-nav a').forEach((link) => {
+  link.addEventListener('click', () => {
+    siteHeader.classList.remove('menu-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Open menu');
+  });
+});
 
-  addThemeClass(bodyClass, btnClass)
+const contactForm = document.querySelector('#contact-form');
+const formStatus = document.querySelector('#form-status');
 
-	localStorage.setItem('portfolio-theme', bodyClass)
-	localStorage.setItem('portfolio-btn-theme', btnClass)
-}
+contactForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const submitButton = contactForm.querySelector('button[type="submit"]');
+  const payload = Object.fromEntries(new FormData(contactForm));
 
-const toggleTheme = () =>
-	isDark() ? setTheme('light', 'fa-moon') : setTheme('dark', 'fa-sun')
+  submitButton.disabled = true;
+  formStatus.textContent = 'Sending…';
+  formStatus.className = '';
 
-btnTheme.addEventListener('click', toggleTheme)
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Your message could not be sent.');
 
-const displayList = () => {
-	const navUl = document.querySelector('.nav__list')
-
-	if (btnHamburger.classList.contains('fa-bars')) {
-		btnHamburger.classList.remove('fa-bars')
-		btnHamburger.classList.add('fa-times')
-		navUl.classList.add('display-nav-list')
-	} else {
-		btnHamburger.classList.remove('fa-times')
-		btnHamburger.classList.add('fa-bars')
-		navUl.classList.remove('display-nav-list')
-	}
-}
-
-btnHamburger.addEventListener('click', displayList)
-
-const scrollUp = () => {
-	const btnScrollTop = document.querySelector('.scroll-top')
-
-	if (
-		body.scrollTop > 500 ||
-		document.documentElement.scrollTop > 500
-	) {
-		btnScrollTop.style.display = 'block'
-	} else {
-		btnScrollTop.style.display = 'none'
-	}
-}
-
-document.addEventListener('scroll', scrollUp)
+    contactForm.reset();
+    formStatus.textContent = 'Message sent. I’ll get back to you soon.';
+    formStatus.className = 'success';
+  } catch (error) {
+    formStatus.textContent = error.message || 'Something went wrong. Please email me directly.';
+    formStatus.className = 'error';
+  } finally {
+    submitButton.disabled = false;
+  }
+});
