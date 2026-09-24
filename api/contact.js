@@ -1,6 +1,6 @@
 const SENDLIB_URL = 'https://sendlib.samueltuoyo.com/api/send';
 const CONTACT_EMAIL = process.env.CONTACT_TO || 'youngyusuff006@gmail.com';
-const FROM_EMAIL = process.env.CONTACT_FROM || 'youngyusuff006@gmail.com';
+const FROM_EMAIL = process.env.CONTACT_FROM || 'youngyusuff6@gmail.com';
 
 function clean(value, maxLength) {
   return String(value || '').trim().slice(0, maxLength);
