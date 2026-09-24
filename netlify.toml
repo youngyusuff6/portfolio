@@ -1,3 +1,6 @@
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "CONTACT_FROM,CONTACT_TO"
+
 [[redirects]]
   from = "/api/contact"
   to = "/.netlify/functions/contact"
