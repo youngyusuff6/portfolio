@@ -55,8 +55,10 @@ module.exports = async function contactHandler(request, response) {
       })
     });
 
-    if (!sendlibResponse.ok) {
-      console.error('Sendlib request failed', sendlibResponse.status, await sendlibResponse.text());
+    const sendlibResult = await sendlibResponse.json().catch(() => null);
+
+    if (!sendlibResponse.ok || sendlibResult?.success === false) {
+      console.error('Sendlib request failed', sendlibResponse.status, sendlibResult?.message || 'Unknown error');
       return response.status(502).json({ error: 'Your message could not be sent. Please email me directly.' });
     }
 
